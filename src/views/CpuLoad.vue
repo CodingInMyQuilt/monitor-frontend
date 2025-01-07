@@ -1,4 +1,9 @@
 <template>
+  <div style="text-align: right">
+    <a-select v-model="scope" :style="{width:'160px'}" placeholder="select" :trigger-props="{ autoFitPopupMinWidth: true }"  allow-clear>
+      <a-option v-for="item in scope_data" :value="item.value" :label="item.label" />
+    </a-select>
+  </div>
   <a-space wrap>
     <div :id="`cpu-${i}`" style="width: 180px;height: 180px;border: 1px solid black;" v-for="i in 16"></div>
   </a-space>
@@ -35,8 +40,11 @@ const getAndDrawCpuLoad = async () => {
       cpuData.value[i - 1] = [];
     }
     cpuData.value[i - 1].push(data[i - 1]);
-    if (cpuData.value[i - 1].length > 10) { // 保留最近10个数据
-      cpuData.value[i - 1].shift();
+    if (!scope.value) {
+      scope.value = 30;
+    }
+    if (cpuData.value[i - 1].length > scope.value) { // 保留最近的数据
+      cpuData.value[i - 1] = cpuData.value[i - 1].slice(-scope.value);
     }
     drawCpuLoad(i, cpuData.value[i - 1]);
   }
@@ -82,6 +90,19 @@ const drawCpuLoad = (cpuIndex, cpuData) => {
   };
   chartDoms[cpuIndex - 1].setOption(option);
 }
+
+const scope_data = ref([{
+    value: 30,
+    label: '30s'
+  }, {
+    value: 60,
+    label: '1min'
+  }, {
+    value: 90,
+    label: '1min30s'
+  }])
+
+const scope = defineModel();
 
 </script>
 
